@@ -11,6 +11,7 @@ if __name__ == '__main__':
         measurement_name='B_Temperature',
         start=timedelta(minutes=-41),
         location='Living_Room',
-        aggregateWindow=timedelta(minutes=1)
+        aggregate_window=timedelta(minutes=1)
     )
-    pass
+    for m in measurements:
+        print(m)
