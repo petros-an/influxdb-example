@@ -1,3 +1,5 @@
+from datetime import timedelta, datetime
+
 import measurements_api
 
 if __name__ == '__main__':
@@ -5,22 +7,10 @@ if __name__ == '__main__':
         url='http://68.183.159.42:8086/',
         token='your_token',
     )
-
-    # send single value
-
-    api.send_measurement(
-        'some_measurement',
-        tags={'location': 'perissos', 'sensor': 'petros'},
-        value=13,
+    measurements = api.read_measurements(
+        measurement_name='B_Temperature',
+        start=timedelta(minutes=-41),
+        location='Living_Room',
+        aggregateWindow=timedelta(minutes=1)
     )
-
-    """
-        Send multiple values for a single measurement
-        
-       api.send_measurement(
-            'some_measurement',
-            tags={'location': 'perissos', 'sensor': 'petros'},
-            values={'componentX': 1, 'componentY': 2},
-       ) 
-    
-    """
+    pass
