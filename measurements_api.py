@@ -33,7 +33,8 @@ class MeasurementsAPI:
             org=self.org
         )
         self._write_api = self._client.write_api(write_options=SYNCHRONOUS)
-        self.query_api = self._client.query_api()
+        self._query_api = self._client.query_api()
+        self._delete_api = self._client.delete_api()
 
     def send_measurement(
         self,
@@ -70,12 +71,12 @@ class MeasurementsAPI:
             from(bucket: bucket_name)
               |> range(start: _start, stop: now())
               |> filter(fn: (r) => r._measurement == measurement_name)
-              |> filter(fn: (r) => r["location"] == _location)
+              |> filter(fn: (r) => r["location"] )
               |> aggregateWindow(every: aggrWindow, fn: mean)
         """
         aggregate_window = aggregate_window or timedelta(seconds=1)
 
-        data = self.query_api.query(
+        data = self._query_api.query(
             q,
             params={
                 'bucket_name': self.bucket,
@@ -88,3 +89,17 @@ class MeasurementsAPI:
         return [
             r.values for r in data[0].records
         ]
+
+    def delete_measurements(
+        self,
+        measurement_name: str,
+        start: datetime,
+        stop: datetime,
+    ):
+        self._delete_api.delete(
+            start,
+            stop,
+            f"_measurement=\"{measurement_name}\"",
+            bucket=self.bucket,
+            org=self.org,
+        )
