@@ -60,7 +60,7 @@ class MeasurementsAPI:
             e = traceback.format_exc()
             logger.error(e)
             
-    def read_measurements(
+    def read_aggregated_measurements(
         self,
         measurement_name: str,
         start: timedelta,
@@ -89,6 +89,35 @@ class MeasurementsAPI:
         return [
             r.values for r in data[0].records
         ]
+
+    def fetch_all_measurement_data(
+        self,
+        measurement_name: str,
+        start: datetime,
+        stop: datetime,
+        limit: Optional[int] = 100,
+        offset: Optional[int] = 0,
+    ):
+        q = """
+            from(bucket: bucket_name)
+               |> range(start: _start, stop: now())
+               |> filter(fn: (r) => r._measurement == measurement_name)
+               |> limit(n: _limit, offset: _offset) 
+         """
+        data = self._query_api.query(
+            q,
+            params={
+                'bucket_name': self.bucket,
+                'measurement_name': measurement_name,
+                '_start': start,
+                '_stop': stop,
+                '_limit': limit,
+                '_offset': offset,
+            }
+        )
+        return [
+            r.values for r in data[0].records
+        ] if data else None
 
     def delete_measurements(
         self,
